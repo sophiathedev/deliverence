@@ -49,7 +49,7 @@ async function openReceiverListFileDialog(email: string) {
   await set('cached_receiver:' + email, data);
 }
 
-async function openTemplateDialog(email) {
+async function openTemplateDialog(email: string) {
   const path = await open({
     multiple: false,
     directory: false,
