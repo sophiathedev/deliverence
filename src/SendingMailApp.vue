@@ -19,8 +19,7 @@ onMounted(async () => {
   existCachedSenderData.value = await has('cached_sender_data_list');
   if (existCachedSenderData.value) {
     cachedSenderData.value = await get<[SenderData] | null>('cached_sender_data_list');
-
-    console.log(cachedSenderData.value);
+    await message(`Successfully loaded ${cachedSenderData.value?.length || 0} sender account(s)`, {title: 'Cache Loaded', kind: 'info'});
   }
 
   for (let k of cachedSenderData.value!) {
