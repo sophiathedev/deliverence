@@ -11,28 +11,55 @@ const senderFileProgressBar = ref(100);
 const textStatus = ref('');
 
 async function openDialog() {
-  let file_path = await invoke("open_file_dialog");
-  if (file_path === "" || file_path === null) {
+  try {
+    let file_path = await invoke("open_file_dialog");
+    if (file_path === "" || file_path === null) {
+      isLoading.value = false;
+      return;
+    }
+
+    isLoading.value = true;
+    senderFileProgressBar.value = 100;
+
+    textStatus.value = `File selected: ${file_path}`;
+    
+    // Wait a bit to show the status
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    textStatus.value = 'Parsing document...';
+    let parsed_document = await invoke("read_csv", {filePath: file_path});
+
+    if (!parsed_document || (Array.isArray(parsed_document) && parsed_document.length === 0)) {
+      throw new Error('No data found in CSV file');
+    }
+
+    senderFileProgressBar.value += 400;
+
+    textStatus.value = 'Saving data...';
+    await set('cached_sender_data_list', parsed_document);
+    
+    // Ensure cache is written before proceeding
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    senderFileProgressBar.value += 400;
+
+    textStatus.value = 'Opening sending mail window...';
+    
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    await invoke("open_sending_mail_window");
+    
+    // Reset loading state after successful window open
     isLoading.value = false;
-    return;
+    senderFileProgressBar.value = 1000;
+  } catch (error) {
+    console.error('Error loading sender file:', error);
+    isLoading.value = false;
+    senderFileProgressBar.value = 100;
+    textStatus.value = '';
+    // Show error message if needed
+    alert('Error loading file: ' + (error instanceof Error ? error.message : String(error)));
   }
-
-  isLoading.value = true;
-
-  textStatus.value = `File selected: ${file_path}`;
-  textStatus.value = 'Parsing document...';
-  let parsed_document = await invoke("read_csv", {filePath: file_path});
-
-  senderFileProgressBar.value += 600;
-
-  textStatus.value = 'Setting up ...';
-  senderFileProgressBar.value += 300;
-
-  textStatus.value = 'Done !';
-
-  await set('cached_sender_data_list', parsed_document);
-
-  await invoke("open_sending_mail_window");
 }
 
 async function openTemplateManagerWindow() {
