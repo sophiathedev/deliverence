@@ -32,13 +32,7 @@ async function openDialog() {
 
   await set('cached_sender_data_list', parsed_document);
 
-  try {
-    await invoke("open_sending_mail_window");
-  } catch (error) {
-    console.error('Error opening sending mail window:', error);
-    isLoading.value = false;
-    textStatus.value = 'Error opening window. Please try again.';
-  }
+  await invoke("open_sending_mail_window");
 }
 
 async function openTemplateManagerWindow() {

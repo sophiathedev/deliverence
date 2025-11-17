@@ -37,7 +37,8 @@ pub async fn open_sending_mail_window(app_handle: tauri::AppHandle) -> Result<()
 #[tauri::command]
 pub async fn open_template_manager_window(app_handle: tauri::AppHandle) -> Result<(), String> {
     if let Some(main) = app_handle.get_webview_window("main") {
-        let _ = main.hide();
+        let _ = main.show();
+        let _ = main.set_focus();
     }
 
     let new_template_manager_window = WebviewWindowBuilder::new(
@@ -56,7 +57,8 @@ pub async fn open_template_manager_window(app_handle: tauri::AppHandle) -> Resul
     new_template_manager_window.on_window_event(move |event| match event {
         tauri::WindowEvent::CloseRequested { .. } => {
             if let Some(main) = app_handle_clone.get_webview_window("main") {
-                let _ = main.close();
+                let _ = main.show();
+                let _ = main.set_focus();
             }
         }
         _ => {}
