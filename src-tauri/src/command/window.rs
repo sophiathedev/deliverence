@@ -23,7 +23,7 @@ pub async fn open_sending_mail_window(app_handle: tauri::AppHandle) -> Result<()
 
     let app_handle_clone = app_handle.clone();
     new_sending_mail_window.on_window_event(move |event| match event {
-        tauri::WindowEvent::Destroyed => {
+        tauri::WindowEvent::CloseRequested { .. } => {
             if let Some(main) = app_handle_clone.get_webview_window("main") {
                 let _ = main.close();
             }
@@ -54,7 +54,7 @@ pub async fn open_template_manager_window(app_handle: tauri::AppHandle) -> Resul
 
     let app_handle_clone = app_handle.clone();
     new_template_manager_window.on_window_event(move |event| match event {
-        tauri::WindowEvent::Destroyed => {
+        tauri::WindowEvent::CloseRequested { .. } => {
             if let Some(main) = app_handle_clone.get_webview_window("main") {
                 let _ = main.close();
             }
