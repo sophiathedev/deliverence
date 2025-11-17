@@ -2,6 +2,12 @@ use tauri::{Manager, WebviewWindowBuilder};
 
 #[tauri::command]
 pub async fn open_sending_mail_window(app_handle: tauri::AppHandle) -> Result<(), String> {
+    // Close the sending_mail window if it already exists
+    if let Some(existing) = app_handle.get_webview_window("sending_mail") {
+        let _ = existing.close();
+    }
+
+    // Hide main window
     if let Some(main) = app_handle.get_webview_window("main") {
         let _ = main.hide();
     }
@@ -25,7 +31,8 @@ pub async fn open_sending_mail_window(app_handle: tauri::AppHandle) -> Result<()
     new_sending_mail_window.on_window_event(move |event| match event {
         tauri::WindowEvent::CloseRequested { .. } => {
             if let Some(main) = app_handle_clone.get_webview_window("main") {
-                let _ = main.close();
+                let _ = main.show();
+                let _ = main.set_focus();
             }
         }
         _ => {}
@@ -36,9 +43,14 @@ pub async fn open_sending_mail_window(app_handle: tauri::AppHandle) -> Result<()
 
 #[tauri::command]
 pub async fn open_template_manager_window(app_handle: tauri::AppHandle) -> Result<(), String> {
+    // Close the template_manager window if it already exists
+    if let Some(existing) = app_handle.get_webview_window("template_manager") {
+        let _ = existing.close();
+    }
+
+    // Hide main window
     if let Some(main) = app_handle.get_webview_window("main") {
-        let _ = main.show();
-        let _ = main.set_focus();
+        let _ = main.hide();
     }
 
     let new_template_manager_window = WebviewWindowBuilder::new(
