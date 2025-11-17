@@ -25,7 +25,6 @@ fn replace_content_in_template(template_content: String, receiver_data: CsvRecei
 
 #[tauri::command]
 pub async fn send_email_by_thread(_app: tauri::AppHandle, sender_data: Vec<CsvSenderRecord>, receiver_data: HashMap<String, Vec<CsvReceiverRecord>>, email_subject: HashMap<String, String>, template_path: HashMap<String, String>, timeout: i32) {
-    println!("{:?}", timeout);
     let mut thread_pool = vec![];
 
     for sender in sender_data {

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import {get, has, set} from 'tauri-plugin-cache-api';
 import {message, open} from '@tauri-apps/plugin-dialog';
-import {onMounted, ref} from "vue";
+import {ref} from "vue";
 import Button from "./components/Button.vue";
 import {invoke} from "@tauri-apps/api/core";
 
 type SenderData = { name: string, email: string, password: string }
 
+const isLoading = ref(true);
 const existCachedSenderData = ref(false);
 const cachedSenderData = ref<SenderData[] | null>([]);
 
@@ -15,21 +16,22 @@ const isLoadedReceiverData: any = ref({})
 const receiverField: any = ref([])
 const templatePath: any = ref({});
 const emailSubject: any = ref({} as Record<string, string>);
-onMounted(async () => {
+
+(async () => {
   existCachedSenderData.value = await has('cached_sender_data_list');
   if (existCachedSenderData.value) {
     cachedSenderData.value = await get<[SenderData] | null>('cached_sender_data_list');
-    await message(`Successfully loaded ${cachedSenderData.value?.length || 0} sender account(s)`, {title: 'Cache Loaded', kind: 'info'});
-  }
 
-  for (let k of cachedSenderData.value!) {
-    // initialize a subject entry keyed by sender email so inputs can bind via v-model
-    emailSubject.value[k.email] = '';
-    // preserve existing initialization for receiver loaded flag
-    isLoadedReceiverData.value[k.email] = false;
+    if (cachedSenderData.value) {
+      for (let k of cachedSenderData.value) {
+        emailSubject.value[k.email] = '';
+        isLoadedReceiverData.value[k.email] = false;
+      }
+    }
   }
-
-})
+  
+  isLoading.value = false;
+})();
 
 
 async function openReceiverListFileDialog(email: string) {
@@ -81,7 +83,14 @@ async function execute() {
 </script>
 
 <template>
-  <div v-if="!existCachedSenderData"
+  <div v-if="isLoading"
+       class="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
+    <div class="text-center p-8">
+      <span class="loading loading-spinner loading-lg text-info"></span>
+      <h2 class="mt-4 text-xl text-neutral-500">Loading sender data...</h2>
+    </div>
+  </div>
+  <div v-else-if="!existCachedSenderData"
        class="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-800">
     <div class="text-center p-8">
       <h1 class="text-6xl font-extrabold text-neutral-700">Oops</h1>
